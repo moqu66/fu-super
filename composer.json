@@ -1,0 +1,21 @@
+{
+    "name": "acgmo/fu-super",
+    "description": "Excellent file upload tool",
+    "type": "library",
+    "require": {
+        "php": "^7.0",
+        "ext-fileinfo": "*",
+        "ralouphie/mimey": "^2.1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "FuSuper\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "LittleMo",
+            "email": "LittleMo@oror.cc"
+        }
+    ]
+}
