@@ -38,7 +38,7 @@ class Main
         if (empty($save_dir)) {
             $this->save_dir = '/upload/' . date('Ymd') . '/';
         } else {
-            $this->save_dir = '/' . ltrim($save_dir, '/');
+            $this->save_dir = '/' . trim($save_dir, '/') . '/';
         }
 
         if (empty($suffix)) {
