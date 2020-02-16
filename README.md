@@ -54,8 +54,9 @@ if ($rs) {
 ```
 
 #### 返回的上传信息参数说明
+#### 上传成功：
+![上传成功](demo/success.png)
 ```php
-    #上传成功：
     array(
         'file_name_old' => '上传前的文件名称，文件原名称',
         'file_name_new' => '上传后的文件名称，文件新名称',
@@ -65,7 +66,11 @@ if ($rs) {
         'absolute_path' => '文件绝对路径',
         'relative_path' => '文件相对路径，就是从你项目根目录开始',
     );
-
+```
+----
+#### 上传失败：
+![上传失败](demo/error.png)
+```php
     #错误信息：
     array(
         'info' => array(
