@@ -3,7 +3,7 @@
     "description": "Excellent file upload tool",
     "type": "library",
     "require": {
-        "php": "^7.0",
+        "php": ">=5.6",
         "ext-fileinfo": "*",
         "ralouphie/mimey": "^2.1.0"
     },
