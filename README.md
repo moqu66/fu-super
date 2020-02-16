@@ -55,7 +55,7 @@ if ($rs) {
 
 #### 返回的上传信息参数说明
 #### 上传成功：
-![上传成功](https://sm.ms/image/R2ze3BQPitxyaDr)
+![上传成功](https://i.loli.net/2020/02/16/R2ze3BQPitxyaDr.png)
 ```php
 array(
     array( #多维数组，如果只上传一个文件，索引拿 0 就可以了
@@ -71,7 +71,7 @@ array(
 ```
 ----
 #### 上传失败：
-![上传失败](https://sm.ms/image/AYPHsCx5eLWjnak)
+![上传失败](https://i.loli.net/2020/02/16/AYPHsCx5eLWjnak.png)
 ```php
 array(
 'info' => array
