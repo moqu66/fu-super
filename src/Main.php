@@ -14,7 +14,7 @@ class Main
     private $suffix;        #后缀白名单
     private $file_size;     #文件大小
     private $save_dir;      #保存目录
-    public $file_path;      #文件保存路径
+    public $file_info;      #文件信息
     public $error_info;     #错误信息
 
     /**
@@ -51,104 +51,101 @@ class Main
     }
 
     /**
-     * 上传保存文件
-     * @param string $file $_FILES['userfile'] 预定义变量获取的数组
-     * @param string $file_name 文件新名称, 默认将使用 uniqid() 函数随机创建
+     * @param array $file $_FILES['userfile'] 预定义变量获取的数组
      * @param bool $cover 是否覆盖原有文件, 默认否 false
      * @return bool 上传成功 true , 失败false
      */
-    public function upSave($file, $file_name = null, $cover = false)
+    public function upSave($file, $cover = false)
     {
-        if (empty($file)) {
-            $this->error_info = array(
-                'code' => 1,
-                'msg' => '没有接收到文件数据！',
+        if (!is_array($file['tmp_name']) and is_file($file['tmp_name'])) {
+            $data = array(
+                'name' => $file['name'],
+                'tmp_name' => $file['tmp_name'],
+                'error' => $file['error'],
             );
-            return false;
-        } else if (!is_file($file['tmp_name'])) {
-            $this->error_info = array(
-                'code' => 2,
-                'msg' => '临时文件不存在！',
-            );
+            return $this->upload($data, $cover);
+        } else if (is_array($file['tmp_name']) and !empty($file['tmp_name'])) {
+            for ($i = 0; $i < count($file['tmp_name']); $i++) {
+                $data = array(
+                    'name' => $file['name'][$i],
+                    'tmp_name' => $file['tmp_name'][$i],
+                    'error' => $file['error'][$i],
+                );
+                $this->upload($data, $cover);
+            }
+            if ($this->error_info['number'] >= count($file['tmp_name'])) {
+                return false;
+            } else {
+                return true;
+            }
+        } else {
+            $this->outputError(11, '没有接收到文件数据！');
+        }
+    }
+
+    /**
+     * 上传保存文件
+     * @param array $file $_FILES['userfile'] 预定义变量获取的数组
+     * @param bool $cover 是否覆盖原有文件, 默认否 false
+     * @return bool 上传成功 true , 失败false
+     */
+    private function upload($file, $cover = false)
+    {
+        if (!is_file($file['tmp_name'])) {
+            $this->outputError(12, '临时文件不存在！', $file['name']);
             return false;
         }
 
         $file_info = new \finfo(FILEINFO_MIME_TYPE);
         $mime_name = $file_info->file($file['tmp_name']);
-        if (!$this->checkSuffix($mime_name)) {
+        if (!$this->checkSuffix($mime_name, $file['name'])) {
             return false;
         }
 
         if ($file['error'] > 0) {
             switch ($file['error']) {
                 case UPLOAD_ERR_INI_SIZE :
-                    $this->error_info = array(
-                        'code' => 3,
-                        'msg' => '文件大小超出了服务器的限制！！',
-                    );
+                    $this->outputError(21, '文件大小超出了服务器的限制！', $file['name']);
                     break;
                 case UPLOAD_ERR_FORM_SIZE :
-                    $this->error_info = array(
-                        'code' => 4,
-                        'msg' => '文件大小超出了表单规定范围！',
-                    );
+                    $this->outputError(22, '文件大小超出了表单的规定范围！', $file['name']);
                     break;
                 case UPLOAD_ERR_PARTIAL :
-                    $this->error_info = array(
-                        'code' => 5,
-                        'msg' => '文件只有部分被上传！',
-                    );
+                    $this->outputError(23, '文件只有部分被上传！', $file['name']);
                     break;
                 case UPLOAD_ERR_NO_FILE:
-                    $this->error_info = array(
-                        'code' => 6,
-                        'msg' => '没有文件被上传！',
-                    );
+                    $this->outputError(24, '没有文件被上传！', $file['name']);
                     break;
                 case UPLOAD_ERR_NO_TMP_DIR:
-                    $this->error_info = array(
-                        'code' => 7,
-                        'msg' => '找不到临时文件夹！',
-                    );
+                    $this->outputError(25, '找不到临时文件夹！', $file['name']);
                     break;
                 case UPLOAD_ERR_CANT_WRITE:
-                    $this->error_info = array(
-                        'code' => 8,
-                        'msg' => '文件写入失败！',
-                    );
+                    $this->outputError(26, '文件写入失败！', $file['name']);
                     break;
             }
             return false;
         }
 
         if (filesize($file['tmp_name']) > $this->file_size) {
-            $this->error_info = array(
-                'code' => 9,
-                'msg' => '文件大小超出了限制范围！',
-            );
+            $this->outputError(13, '文件大小超出了限制范围！', $file['name']);
             return false;
         }
 
         $file_dir = $this->root_path . $this->save_dir;
         if (!file_exists($file_dir)) {
             if (!mkdir($file_dir, 0755, true)) {
-                $this->error_info = array(
-                    'code' => 10,
-                    'msg' => '创建文件保存目录时失败！',
-                );
+                $this->outputError(14, '创建保存目录失败！', $file['name']);
                 return false;
             }
         }
 
-        if (empty($file_name)) {
-            $file_name = uniqid();
-        }
-        $file_name .= '.' . $this->file_suffix;
+
+        $file_name = uniqid('fu_super_') . '.' . $this->file_suffix;
 
         $file_path = $file_dir . $file_name;
         if (file_exists($file_path)) {
             if ($cover) {
-                $file_name = uniqid() . '.' . $this->file_suffix;
+                $file_name = uniqid('fu_super_') . '.' . $this->file_suffix;
                 $file_path = $this->root_path . $file_dir . $file_name;
             }
         }
@@ -156,18 +153,20 @@ class Main
         try {
             $rs = move_uploaded_file($file['tmp_name'], $file_path);
             if (!$rs) {
-                throw new Exception('保存文件到指定位置失败！');
+                throw new Exception('保存文件到指定位置失败！', $file['name']);
             }
-            $this->file_path = array(
-                0 => $file_path,
-                1 => $this->save_dir . $file_name,
+            $this->file_info[] = array(
+                'file_name_old' => $file['name'],
+                'file_name_new' => $file_name,
+                'file_size' => filesize($file_path),
+                'file_mime' => $mime_name,
+                'file_suffix' => $this->file_suffix,
+                'absolute_path' => realpath($file_path),
+                'relative_path' => realpath($this->save_dir . $file_name),
             );
             return true;
         } catch (Exception $e) {
-            $this->error_info = array(
-                'code' => 11,
-                'msg' => $e->getMessage(),
-            );
+            $this->outputError(3, $e->getMessage());
             return false;
         }
 
@@ -178,27 +177,40 @@ class Main
      * @param string $mime_name MIME类型, 例: application/json
      * @return bool 存在白名单内返回 true, 不存在返回 false
      */
-    private function checkSuffix($mime_name)
+    private function checkSuffix($mime_name, $file_name)
     {
         $mimes = new MimeTypes();
-        $mime_suffix = $mimes->getExtension($mime_name);
-        if (empty($mime_suffix)) {
-            $this->error_info = array(
-                'code' => 12,
-                'msg' => '检测失败, 未知的文件后缀名！',
-            );
+        $mime_suffix_array = $mimes->getAllExtensions($mime_name);
+        if (empty($mime_suffix_array)) {
+            $this->outputError(15, '检测失败，未知的文件类型！', $file_name);
             return false;
         } else {
-            if (!in_array($mime_suffix, $this->suffix)) {
-                $this->error_info = array(
-                    'code' => 13,
-                    'msg' => '文件类型不在上传许可范围内！',
-                );
+            if (empty(array_intersect($this->suffix, $mime_suffix_array))) {
+                $this->outputError(16, '文件类型不在上传许可范围内！', $file_name);
                 return false;
             } else {
-                $this->file_suffix = $mime_suffix;
+                $this->file_suffix = $mimes->getExtension($mime_name);
                 return true;
             }
         }
+    }
+
+    /**
+     * 生成错误信息到成员属性 $error_info
+     * @param int $code 错误代码
+     * @param string $msg 错误信息
+     * @param string $file_name 文件名
+     */
+    private function outputError($code, $msg, $file_name = null)
+    {
+        $info = array(
+            'code' => $code,
+            'msg' => $msg,
+            'file_name' => $file_name,
+        );
+
+        $this->error_info['info'][] = $info;
+        $this->error_info['number'] = count($this->error_info['info']);
+        $this->error_info['msg'] = '共有' . $this->error_info['number'] . '个文件上传失败！';
     }
 }
