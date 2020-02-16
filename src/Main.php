@@ -15,7 +15,13 @@ class Main
     private $file_size;     #文件大小
     private $save_dir;      #保存目录
     public $file_info;      #文件信息
-    public $error_info;     #错误信息
+
+    //错误信息
+    public $error_info = array(
+        'info' => null,
+        'number' => 0,
+        'msg' => null,
+    );
 
     /**
      * Main constructor.
