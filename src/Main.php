@@ -15,6 +15,7 @@ class Main
     private $file_size;     #文件大小
     private $save_dir;      #保存目录
     public $file_info;      #文件信息
+    public $mime_array;     #MIME映射后缀
 
     //错误信息
     public $error_info = array(
@@ -172,7 +173,7 @@ class Main
             );
             return true;
         } catch (Exception $e) {
-            $this->outputError(3, $e->getMessage());
+            $this->outputError(15, $e->getMessage(), $file['name']);
             return false;
         }
 
@@ -185,19 +186,37 @@ class Main
      */
     private function checkSuffix($mime_name, $file_name)
     {
-        $mimes = new MimeTypes();
-        $mime_suffix_array = $mimes->getAllExtensions($mime_name);
-        if (empty($mime_suffix_array)) {
-            $this->outputError(15, '检测失败，未知的文件类型！', $file_name);
-            return false;
+        if (empty($this->mime_array)) {
+            $mimes = new MimeTypes();
         } else {
-            if (empty(array_intersect($this->suffix, $mime_suffix_array))) {
-                $this->outputError(16, '文件类型不在上传许可范围内！', $file_name);
-                return false;
-            } else {
-                $this->file_suffix = $mimes->getExtension($mime_name);
-                return true;
+            $builder = \Mimey\MimeMappingBuilder::create();
+            foreach ($this->mime_array as $k => $v) {
+                foreach ($v as $vv) {
+                    $builder->add($k, $vv);
+                }
             }
+            $mimes = new MimeTypes($builder->getMapping());
+        }
+
+        $mime_array = array();
+        foreach ($this->suffix as $v) {
+            $w = $mimes->getAllMimeTypes($v);
+            if (!empty($w)) {
+                foreach ($w as $s) {
+                    $mime_array[] = $s;
+                }
+            }
+        }
+
+        if (in_array($mime_name, $mime_array)) {
+            $this->file_suffix = $mimes->getExtension($mime_name);
+            return true;
+        } else {
+            if (empty($mimes->getAllExtensions($mime_name))) {
+                $this->outputError(16, '找不到MIME对应的后缀名！', $file_name);
+            }
+            $this->outputError(17, '文件类型不在上传许可范围内！', $file_name);
+            return false;
         }
     }
 

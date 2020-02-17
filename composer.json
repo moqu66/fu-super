@@ -16,7 +16,9 @@
     "authors": [
         {
             "name": "LittleMo",
-            "email": "LittleMo@oror.cc"
+            "email": "LittleMo@oror.cc",
+            "homepage": "https://sm.link",
+            "role": "Developer"
         }
     ]
 }
