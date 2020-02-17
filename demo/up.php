@@ -1,25 +1,31 @@
 <?php
+/**
+ * @author        LittleMo
+ * @description   文件描述
+ */
 
 require 'vendor/autoload.php';
 
-$file_data = $_FILES['imgdata'];
-
 use \FuSuper\Main;
 
-$fs = new Main(__DIR__);
+$file_data = $_FILES['fileData'];
 
-$fs->setConf();
+$fu = new Main(__DIR__);
 
-$rs = $fs->upSave($file_data);
+$fu->setConf();
+
+$rs = $fu->upSave($file_data);
 
 if ($rs) {
     echo '<pre>';
-    print_r($fs->file_info);
+    print_r($fu->file_info);
     echo '<hr/>';
-    print_r($fs->error_info);
+    if ($fu->error_info['number'] > 0) {
+        print_r($fu->error_info);
+    }
     echo '</pre>';
 } else {
     echo '<pre>';
-    print_r($fs->error_info);
+    print_r($fu->error_info);
     echo '</pre>';
 }
