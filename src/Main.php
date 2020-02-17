@@ -214,6 +214,7 @@ class Main
         } else {
             if (empty($mimes->getAllExtensions($mime_name))) {
                 $this->outputError(16, '找不到MIME对应的后缀名！', $file_name);
+                return false;
             }
             $this->outputError(17, '文件类型不在上传许可范围内！', $file_name);
             return false;
