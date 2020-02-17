@@ -12,6 +12,7 @@
             "FuSuper\\": "src/"
         }
     },
+    "license": "MIT",
     "authors": [
         {
             "name": "LittleMo",
