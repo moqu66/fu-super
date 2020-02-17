@@ -169,7 +169,7 @@ class Main
                 'file_mime' => $mime_name,
                 'file_suffix' => $this->file_suffix,
                 'absolute_path' => realpath($file_path),
-                'relative_path' => realpath($this->save_dir . $file_name),
+                'relative_path' => $this->save_dir . $file_name,
             );
             return true;
         } catch (Exception $e) {
