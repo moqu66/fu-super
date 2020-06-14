@@ -38,8 +38,8 @@ if ($rs) {
     echo '<hr/>';
     # 注意，如果是多文件上传，只有当全部文件上传失败才会返回false， 意思就是有一个文件上传成功，  upSave()方法会返回true
     # 这时候需要多一步判断， 看代码：
-    if ($this->error_info['number'] > 0) { # error_info['number'] ,上传失败的文件数量
-        print_r($this->error_info);
+    if ($fu_super->error_info['number'] > 0) { # error_info['number'] ,上传失败的文件数量
+        print_r($fu_super->error_info);
     }
     
     echo '</pre>';
