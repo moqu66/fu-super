@@ -145,13 +145,14 @@ class Main
                 return false;
             }
         }
-
-
-        $file_name = uniqid('fu_super_') . '.' . $this->file_suffix;
+	
+		$file_name = explode('.', uniqid(date('YmdHis'), true));
+	
+		$file_name = implode('', $file_name) . '.' . $this->file_suffix;
 
         $file_path = $file_dir . $file_name;
         if (file_exists($file_path)) {
-            if ($cover) {
+            if (!$cover) {
                 $file_name = explode('.', uniqid(date('YmdHis'), true));
                 
                 $file_name = implode('', $file_name) . '.' . $this->file_suffix;
